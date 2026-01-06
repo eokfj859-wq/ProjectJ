@@ -9,8 +9,15 @@ const input: 찾은 그 HTML 태그를 input이라는 변수에 담습니다. �
  */
 
 
-// 할 일 목록을 담을 배열 (참조형 데이터 - 가변값)
-let todos = [];
+// [수정] 1. 시작할 때 로컬 스토리지에서 데이터를 가져옵니다. 
+// 데이터가 없으면 빈 배열([])을 기본값으로 사용합니다.
+let todos = JSON.parse(localStorage.getItem('myTodos')) || [];
+
+// [추가] 2. 로컬 스토리지에 현재 todos 상태를 저장하는 함수
+function save() {
+    // 로컬 스토리지는 문자열만 저장할 수 있어서 JSON.stringify로 변환해야 합니다.
+    localStorage.setItem('myTodos', JSON.stringify(todos));
+}
 
 function addTodo() {
     if (input.value.trim() === '') return;
@@ -23,7 +30,9 @@ function addTodo() {
     };
 
     todos.push(newTodo); // 배열에 추가
-    input.value = ''; //입력글자 초기화>버튼 누르면 글자 지워지게 하는 기
+    input.value = ''; //입력글자 초기화>버튼 누르면 글자 지워지게 하는 기능
+
+    save(); // [추가] 데이터 변경 후 저장
     render();
 }
 
@@ -94,6 +103,7 @@ function toggleTodo(id) {
         todo.id === id ? { ...todo, completed: !todo.completed } : todo
     );
 
+    save(); // [추가] 데이터 변경 후 저장
     render();
 }
 
@@ -103,8 +113,12 @@ function deleteTodo(id) {
 //todo => todo.id !== id라는 함수를 filter에게 전달한 겁니다. 
 // filter는 이 함수를 실행해보고 결과가 true인 데이터만 모아서 새로운 배열을 만듭니다.
 
+    save(); // [추가] 데이터 변경 후 저장
     render();
 }
+
+// 시작하자마자 저장된 데이터 보여주기
+render();
 
 //추가버튼 누르면 addTodo함수 실행 기
 addBtn.addEventListener('click', addTodo);
