@@ -25,6 +25,49 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
+/* 1. 모달 전체 배경 (화면 전체를 꽉 채우고 공중에 띄움) */
+.modal-overlay {
+    position: fixed;    /* 화면에 고정 */
+    top: 0;
+    left: 0;
+    width: 100vw;       /* 화면 가로 꽉 차게 */
+    height: 100vh;      /* 화면 세로 꽉 차게 */
+    background-color: rgba(0, 0, 0, 0.6); /* 반투명한 검정 배경 */
+    display: flex;      /* 내부 콘텐츠를 중앙 정렬하기 위해 필요 */
+    justify-content: center; /* 가로 중앙 */
+    align-items: center;     /* 세로 중앙 */
+    z-index: 9999;      /* 다른 어떤 것보다 위에 올라오게 함 */
+}
+
+/* 2. 모달 실제 흰색 상자 */
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;   /* 너무 커지지 않게 */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;          /* 입력창 사이 간격 */
+}
+
+/* 3. 숨김 처리 (JS에서 이 클래스를 넣었다 뺐다) */
+.hidden {
+    display: none !important; /* 무조건 안 보이게 */
+}
+
+/* 입력창들 디자인*/
+.detail-inputs input, 
+.detail-inputs textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* 패딩 때문에 삐져나가지 않게 */
+}
+
 h1 {
     color: #333;
     margin-bottom: 1.5rem;

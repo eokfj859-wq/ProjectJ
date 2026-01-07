@@ -11,11 +11,27 @@
         <h1>Doo</h1>
         <div class="input-group">
             <input type="text" id="todoInput" placeholder="할 일을 입력하세요...">
-            <button id="addBtn">추가</button>
+            <button id="addBtn">+</button> 
         </div>
-        <ul id="todoList">
-            </ul>
+        <ul id="todoList"></ul>
     </div>
+
+    <div id="todoModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>상세 정보 입력</h2>
+            <div class="detail-inputs">
+                <input type="text" id="detailTitle" placeholder="제목을 입력하세요">
+                <input type="date" id="detailDate">
+                <input type="time" id="detailTime">
+                <textarea id="detailDesc" placeholder="메모를 입력하세요"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button id="saveBtn">저장하기</button>
+                <button id="closeBtn">취소</button>
+            </div>
+        </div>
+    </div>
+
     <script src="03_script.js"></script>
 </body>
 </html>
