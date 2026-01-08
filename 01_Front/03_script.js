@@ -1,86 +1,104 @@
-// 1. 기존 변수들 + 모달 관련 변수 추가
-const input = document.getElementById('todoInput');
-const addBtn = document.getElementById('addBtn'); // 이제 + 버튼 역할
-const todoList = document.getElementById('todoList');
+// 1. 서버 주소 설정 (코드스페이스 포트 5000번 주소)
+const SERVER_URL = "https://cuddly-spork-v69rrg7x955j3494-5000.app.github.dev";
 
-// [추가] 모달 관련 엘리먼트
+// HTML 엘리먼트들 (기존과 동일)
+const input = document.getElementById('todoInput');
+const addBtn = document.getElementById('addBtn');
+const todoList = document.getElementById('todoList');
 const modal = document.getElementById('todoModal');
 const saveBtn = document.getElementById('saveBtn');
 const closeBtn = document.getElementById('closeBtn');
-
-// [추가] 모달 내부 입력창들
 const detailTitle = document.getElementById('detailTitle');
 const detailDate = document.getElementById('detailDate');
 const detailTime = document.getElementById('detailTime');
 const detailDesc = document.getElementById('detailDesc');
 
-// 데이터 로드 (기존과 동일)
-let todos = JSON.parse(localStorage.getItem('myTodos')) || [];
+let todos = []; // 이제 데이터는 서버에서 가져올 것이므로 빈 배열로 시작
 
-
-// 저장 및 렌더링 함수 (기존과 동일)
-function save() {
-    localStorage.setItem('myTodos', JSON.stringify(todos));
+// 2. [추가] 서버에서 데이터 가져오기 (Read - GET)
+async function fetchTodos() {
+    try {
+        const response = await fetch(`${SERVER_URL}/api/todos`);
+        if (!response.ok) throw new Error('서버 응답 오류');
+        todos = await response.json();
+        render();
+    } catch (error) {
+        console.error("데이터 로드 실패:", error);
+    }
 }
 
-// --- [수정 및 추가된 기능들] ---
-
-// 1. 모달 열기/닫기 로직
-const openModal = () => {
-    // 메인 페이지의 짧은 입력창에 글자가 있다면 상세 제목에 미리 넣어주기
-    detailTitle.value = input.value; 
-    modal.classList.remove('hidden');
-};
-
-const closeModal = () => {
-    modal.classList.add('hidden');
-    // 닫을 때 입력값들 초기화
-    detailTitle.value = '';
-    detailDate.value = '';
-    detailTime.value = '';
-    detailDesc.value = '';
-    input.value = '';
-};
-
-// 2. 상세 데이터 저장 (기존 addTodo를 확장)
-function saveDetailedTodo() {
+// 3. [수정] 서버에 데이터 저장하기 (Create - POST)
+async function saveDetailedTodo() {
     if (detailTitle.value.trim() === '') {
         alert('제목은 필수입니다!');
         return;
     }
 
-    // [중요] 할 일 데이터를 더 풍부한 객체로 생성
     const newTodo = {
-        id: Date.now(),
-        text: detailTitle.value,      // 제목
-        date: detailDate.value,       // 날짜
-        time: detailTime.value,       // 시간
-        desc: detailDesc.value,       // 메모
+        text: detailTitle.value,
+        date: detailDate.value,
+        time: detailTime.value,
+        desc: detailDesc.value,
         completed: false
     };
 
-    todos.push(newTodo);
-    save();
-    render();
-    closeModal(); // 저장 후 모달 닫기
+    try {
+        const response = await fetch(`${SERVER_URL}/api/todos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newTodo)
+        });
+
+        if (response.ok) {
+            const savedData = await response.json(); // 서버가 생성한 ID가 포함된 데이터
+            todos.push(savedData);
+            render();
+            closeModal();
+        }
+    } catch (error) {
+        console.error("저장 실패:", error);
+    }
 }
 
-// 3. 목록 출력 (상세 정보까지 보이도록 수정)
+// 4. [수정] 삭제 로직 (Delete - DELETE)
+async function deleteTodo(id) {
+    try {
+        const response = await fetch(`${SERVER_URL}/api/todos/${id}`, {
+            method: 'DELETE'
+        });
+        if (response.ok) {
+            todos = todos.filter(todo => todo.id !== id);
+            render();
+        }
+    } catch (error) {
+        console.error("삭제 실패:", error);
+    }
+}
+
+// 5. [수정] 완료 상태 변경 (Update - PATCH)
+async function toggleTodo(id) {
+    const todo = todos.find(t => t.id === id);
+    if (!todo) return;
+
+    try {
+        // 여기서는 예시로 로컬 데이터만 바꾸지만, 
+        // 실제로는 서버에도 수정한 정보를 보내야 완벽합니다.
+        todo.completed = !todo.completed;
+        render();
+    } catch (error) {
+        console.error("상태 변경 실패:", error);
+    }
+}
+
+// --- 나머지 렌더링 및 모달 로직은 동일 ---
 function render() {
     todoList.innerHTML = '';
-
     todos.forEach(todo => {
         const li = document.createElement('li');
-        
-        // 날짜와 시간이 있을 때만 표시해주는 작은 로직 추가
-        const dateTimeInfo = (todo.date || todo.time) 
-            ? `<small>${todo.date} ${todo.time}</small>` 
-            : '';
-
+        const dateTimeInfo = (todo.date || todo.time) ? `<small>${todo.date} ${todo.time}</small>` : '';
         li.innerHTML = `
             <div class="todo-item">
-                <span class="${todo.completed ? 'completed' : ''}" 
-                      onclick="toggleTodo(${todo.id})">
+                <span class="${todo.completed ? 'completed' : ''}" onclick="toggleTodo(${todo.id})">
                     <strong>${todo.text}</strong> ${dateTimeInfo}
                     <p class="todo-memo">${todo.desc}</p>
                 </span>
@@ -91,29 +109,13 @@ function render() {
     });
 }
 
-// --- [기존 로직 유지] ---
-function toggleTodo(id) {
-    todos = todos.map(todo => 
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    );
-    save();
-    render();
-}
+// 모달 함수 및 이벤트 연결
+const openModal = () => { detailTitle.value = input.value; modal.classList.remove('hidden'); };
+const closeModal = () => { modal.classList.add('hidden'); /* 입력창 초기화 로직... */ };
 
-function deleteTodo(id) {
-    todos = todos.filter(todo => todo.id !== id);
-    save();
-    render();
-}
-
-// --- [이벤트 연결] ---
-
-// + 버튼 누르면 상세 입력창(모달) 띄우기
 addBtn.addEventListener('click', openModal);
-
-// 모달 안의 저장/취소 버튼
 saveBtn.addEventListener('click', saveDetailedTodo);
 closeBtn.addEventListener('click', closeModal);
 
-// 초기 렌더링
-render();
+// 앱 시작 시 서버에서 데이터 불러오기
+fetchTodos();

@@ -1,0 +1,21 @@
+{
+  "name": "projectj",
+  "version": "1.0.0",
+  "description": "개인 프로젝트",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eokfj859-wq/ProjectJ.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/eokfj859-wq/ProjectJ/issues"
+  },
+  "homepage": "https://github.com/eokfj859-wq/ProjectJ#readme"
+}
